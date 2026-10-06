@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>姿控步骤单 · 多副本收敛演练台</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <h1>姿控步骤单 · 多副本收敛演练台</h1>
+  <div class="sub">两至四个副本 · 至多四十项生成/投递动作 · 按稳定操作标识收敛 · 墓碑与乱序等待 · 重开恢复</div>
+</header>
+
+<main>
+  <section class="panel editor-panel">
+    <div class="panel-head">
+      <h2>① 粘贴演练单</h2>
+      <div class="hint">
+        <code>REPLICAS 2..4</code> · <code>GEN/HOLD &lt;id&gt; insert|undo ...</code> · <code>DELIVER &lt;id&gt; [R1,R2] [SET k=v ...]</code>
+      </div>
+    </div>
+    <textarea id="sheet" spellcheck="false"></textarea>
+    <div class="row">
+      <button id="btnRun" class="primary">整段执行</button>
+      <button id="btnReset">清空恢复态</button>
+      <span id="parseInfo" class="parse-info"></span>
+    </div>
+    <div class="examples">
+      <button data-example="concurrent">载入：离线并发·逆序投递</button>
+      <button data-example="undo">载入：祖先撤销·迟到合法子项</button>
+      <button data-example="reject">载入：篡改/缺父/越界·首个拒因</button>
+      <button data-example="recovery">载入：滞留投递·重开恢复</button>
+    </div>
+    <div class="append-box">
+      <h3>恢复后继续接收投递（追加单条指令）</h3>
+      <div class="row">
+        <input id="appendLine" placeholder='例如：DELIVER b2 R1,R2' spellcheck="false" />
+        <button id="btnAppend">投递</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel replay-panel">
+    <div class="panel-head">
+      <h2>② 回放</h2>
+      <div id="convBanner" class="banner idle">尚未执行</div>
+    </div>
+    <div class="replay-controls">
+      <button id="btnFirst">⏮</button>
+      <button id="btnPrev">◀</button>
+      <button id="btnPlay">▶ 自动</button>
+      <button id="btnNext">▶</button>
+      <button id="btnLast">⏭ 整段</button>
+      <input id="frameRange" type="range" min="0" max="0" value="0" />
+      <span id="frameLabel" class="frame-label">帧 0 / 0</span>
+    </div>
+    <div id="frameLog" class="frame-log">—</div>
+  </section>
+
+  <section id="replicas" class="replicas"></section>
+</main>
+
+<template id="replicaTpl">
+  <article class="panel replica">
+    <div class="panel-head replica-head">
+      <h2 class="replica-name"></h2>
+      <span class="applied-count"></span>
+    </div>
+    <div class="col-section">
+      <h3>可见步骤序列 <span class="muted">（稳定操作标识排序）</span></h3>
+      <ol class="seq-list"></ol>
+    </div>
+    <div class="col-section">
+      <h3>墓碑（不可见·保留）</h3>
+      <ul class="tomb-list"></ul>
+    </div>
+    <div class="col-section">
+      <h3>等待操作</h3>
+      <ul class="wait-list"></ul>
+    </div>
+    <div class="col-section">
+      <h3>首个拒因</h3>
+      <div class="first-reject"></div>
+      <details class="all-rejects"><summary>全部拒绝记录</summary><ol></ol></details>
+    </div>
+  </article>
+</template>
+
+<script type="module" src="/app.mjs"></script>
+</body>
+</html>

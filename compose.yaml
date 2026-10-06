@@ -1,0 +1,44 @@
+services:
+  web:
+    build: .
+    image: zikong-step-drill:latest
+    environment:
+      PORT: "8080"
+      HOST: "0.0.0.0"
+      DATA_DIR: /data
+    ports:
+      # 宿主机端口可配置：HOST_PORT=9090 docker compose up web
+      - "${HOST_PORT:-8080}:8080"
+    volumes:
+      - drill-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 3s
+    restart: unless-stopped
+
+  # 一次性验收：并发逆序收敛 / 祖先撤销后迟到子项 / 重开恢复
+  # 执行代码测试 → 构建页面 → 对页面与 /healthz 做 HTTP 冒烟；退出码即验收结果。
+  #   docker compose build && docker compose run --rm verify
+  verify:
+    image: zikong-step-drill:latest
+    build: .
+    depends_on:
+      web:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "== [1/3] 代码测试（并发插入·祖先撤销迟到子项·重开恢复） =="
+        node --test test/
+        echo "== [2/3] 构建页面 =="
+        node scripts/build.mjs
+        echo "== [3/3] HTTP 冒烟（页面 + /healthz + 三场景端到端） =="
+        node scripts/smoke.mjs http://web:8080
+        echo "== verify 全部通过 =="
+
+volumes:
+  drill-data:

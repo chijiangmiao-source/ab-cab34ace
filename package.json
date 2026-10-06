@@ -1,0 +1,17 @@
+{
+  "name": "zikong-step-drill",
+  "version": "1.0.0",
+  "description": "姿控步骤单多副本离线并发演练台（生成/投递、墓碑、乱序等待、首个拒因、重开恢复）",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/",
+    "build": "node scripts/build.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
